@@ -47,56 +47,52 @@ export const startVerification = async (req, res) => {
 export const verifyCode = async (req, res) => {
   try {
     // Извлекаем номер телефона и введенный код из запроса
+    console.log(req.body);
     const phoneNumber = req.body.phoneNumber;
-    const userEnteredCode = req.body.code;
     // Проверка, существует ли уже пользователь с этим номером телефона
     const existingUser = await userModel.findOne({ phoneNumber: phoneNumber });
 
     // console.log("!!!!!!", verificationCodes.phoneNumber,phoneNumber,userEnteredCode);
     // Проверка соответствия введенного кода сохраненному коду верификации
-    if (
-      verificationCodes.phoneNumber.toString() === userEnteredCode.toString()
-    ) {
-      if (existingUser) {
-        // Пользователь уже зарегистрирован, отправьте сообщение об этом
-        const UserData = new UserDto(existingUser);
-        return res.json({
-          success: true,
-          data: UserData,
-          message: "Номер подтвержден!",
-        });
-      }
-      const userRole = await roleModel.findOne({ value: "USER" });
-      const newUser = new userModel({
-        name: "",
-        phoneNumber: phoneNumber,
-        isDataUser: false,
-        avatarUrl: "h",
-        roles: [userRole.value],
-        // Другие поля пользователя
-      });
 
-      const user = await newUser.save();
-      // Создание экземпляра пользователя
-
-      const token = jwt.sign(
-        {
-          _id: user._id,
-          roles: user.roles,
-        },
-        "secret1234",
-        { expiresIn: "30d" }
-      );
-      // Ответ об успешной верификации
-      res.json({
+    if (existingUser) {
+      // Пользователь уже зарегистрирован, отправьте сообщение об этом
+      const UserData = new UserDto(existingUser);
+      return res.json({
         success: true,
-        data: user,
-        message: "Номер успешно подтвержден!",
+        data: UserData,
+        message: "Номер подтвержден!",
       });
-    } else {
-      // Ответ о неудачной верификации
-      res.status(401).json({ success: false, message: "Не правильный код" });
     }
+    const userRole = await roleModel.findOne({ value: "USER" });
+
+    const newUser = new userModel({
+      name: "",
+      phoneNumber: phoneNumber,
+      isDataUser: false,
+      avatarUrl: "h",
+      email: new Date(),
+      roles: [userRole.value],
+      // Другие поля пользователя
+    });
+
+    const user = await newUser.save();
+    // Создание экземпляра пользователя
+
+    const token = jwt.sign(
+      {
+        _id: user._id,
+        roles: user.roles,
+      },
+      "secret1234",
+      { expiresIn: "30d" }
+    );
+    // Ответ об успешной верификации
+    res.json({
+      success: true,
+      data: user,
+      message: "Номер успешно подтвержден!",
+    });
   } catch (error) {
     // Обработка ошибок при проверке кода верификации
     console.error("Error verifying code:", error);
@@ -216,8 +212,26 @@ export const login = async (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
-    // console.log(req.userId);
+    console.log(req.query.userId);
     const user = await userModel.findById(req.userId).populate("courses");
+    if (!user) {
+      return res.status(404).json({ message: "Пользователь не найден" });
+    }
+    const UserData = new UserDto(user);
+
+    res.json(UserData);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      message: "Нет доступа",
+    });
+  }
+};
+
+export const getMeMobile = async (req, res) => {
+  try {
+    console.log();
+    const user = await userModel.findById(req.query.userId).populate("courses");
     if (!user) {
       return res.status(404).json({ message: "Пользователь не найден" });
     }
