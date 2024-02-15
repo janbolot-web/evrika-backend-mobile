@@ -44,7 +44,7 @@ router.delete(
 router.delete("/removeUserModule/:id", CourseController.removeUserModule);
 router.patch(
   "/createModule/:id",
-  roleMiddleware(["ADMIN"]),
+  // roleMiddleware(["ADMIN"]),
   CourseController.createModule
 );
 router.patch("/addCourseToUser", CourseController.addCourseToUser);

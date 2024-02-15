@@ -25,6 +25,7 @@ export const createCourse = async (req, res) => {
     } = req.body;
     const authorsData = await authorModel.create(authors);
     // const lessonsData = await moduleModel.create();
+    console.log('a');
     const doc = new courseModel({
       title,
       duration,
@@ -38,8 +39,6 @@ export const createCourse = async (req, res) => {
       modules: modules,
     });
     await doc.save();
-    // course = course._doc;
-    // console.log(modules);
     res.json({ message: "Новый курс успешно создан" });
   } catch (error) {
     console.log(error);
