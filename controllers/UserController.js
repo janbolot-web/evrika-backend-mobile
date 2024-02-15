@@ -4,7 +4,6 @@ import bcrypt from "bcrypt";
 import userModel from "../models/user-model.js";
 import UserDto from "../dtos/user.dto.js";
 import roleModel from "../models/role-model.js";
-import twilio from "twilio";
 
 // Метод для начала процесса верификации
 let verificationCodes = {};
